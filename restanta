@@ -1,0 +1,192 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
+#include <string>
+//#include <fstream>
+using namespace std;
+
+class Interventie
+{
+public:
+
+	int durata;
+	int nivelComplexitate;
+	Interventie()
+	{
+		durata = 0;
+		nivelComplexitate = 0;
+	}
+	Interventie(int durata, int nivelComplexitate)
+	{
+		this->durata = durata;
+		this->nivelComplexitate = nivelComplexitate;
+	}
+	virtual int CalculPret() = 0;
+};
+class Plomba : public Interventie
+{
+	string locatie;
+	string material;
+public:
+	Plomba() : Interventie()
+	{
+		locatie = "";
+		material = "";
+	}
+	Plomba(string locatie, string material, int durata, int complexitate) : Interventie(durata, complexitate)
+	{
+		this->locatie = locatie;
+		this->material = material;
+	}
+	int CalculPret()
+	{
+		return (durata * nivelComplexitate * 100);
+	}
+};
+class Cabinet
+{
+	const string adresa;
+	string denumire;
+	int numarMedici;
+	string* medici;
+public:
+	Cabinet() : adresa("")
+	{
+		denumire = "";
+		numarMedici = 0;
+		medici = nullptr;
+	}
+	Cabinet(string adresa) : adresa(adresa)
+	{
+		denumire = "";
+		numarMedici = 0;
+		medici = nullptr;
+	}
+	Cabinet(string adresa, string denumire, int nrMedici, const string* medici) : adresa(adresa)
+	{
+		this->denumire = denumire;
+		this->numarMedici = nrMedici;
+		this->medici = new string[nrMedici];
+		for (int i = 0; i < nrMedici; i++)
+		{
+			this->medici[i] = medici[i];
+		}
+	}
+	Cabinet(const Cabinet& c) : adresa(c.adresa)
+	{
+		this->denumire = denumire;
+		this->numarMedici = c.numarMedici;
+		this->medici = new string[c.numarMedici];
+		for (int i = 0; i < c.numarMedici; i++)
+		{
+			this->medici[i] = medici[i];
+		}
+	}
+	void setDenumire(string denumire)
+	{
+		if (denumire.empty() == 0)
+		{
+			this->denumire = denumire;
+		}
+		
+	}
+	string getDenumire()
+	{
+		return this->denumire;
+	}
+	friend ostream& operator<<(ostream& out, Cabinet& c);
+	friend istream& operator>>(istream& in, Cabinet& c);
+	Cabinet& operator=(const Cabinet& c)
+	{
+		if (this != &c)
+		{
+		
+			this->denumire = c.denumire;
+			this->numarMedici = c.numarMedici;
+			if (this->medici != nullptr)
+				delete[] this->medici;
+			this->medici = new string[c.numarMedici];
+			for (int i = 0; i < this->numarMedici; i++)
+				this->medici[i] = c.medici[i];
+		}
+		return *this;
+	}
+	Cabinet operator++()
+	{
+		++numarMedici;
+		return *this;
+	}
+	Cabinet operator++(int i)
+	{
+		Cabinet copie = *this;
+		++numarMedici;
+		return copie;
+	}
+	int getNrMedici() { return this->numarMedici; }
+	string& operator[](int index)
+	{
+		if (index >= 0 && index < numarMedici)
+		{
+			return medici[index];
+		}
+		throw exception("index invalid");
+	}
+	void operator+= (int ceva)
+	{
+		this->numarMedici += ceva;
+	}
+	string operator()(string denumire)
+	{
+		return this->denumire + denumire;
+	}
+};
+
+ostream& operator<<(ostream& out, Cabinet& c)
+{
+	out << "Denumire: " <<  c.denumire << endl;
+	out << "Adresa: " << c.adresa << endl;
+	for (int i = 0; i < c.numarMedici-1; i++)
+	{
+		out << c.medici[i] << ", ";
+	}
+	out << c.medici[c.numarMedici - 1];
+	out << endl;
+	return out;
+
+}
+istream& operator>>(istream& in, Cabinet& c)
+{
+	cout << "Introduceti numele cabinetului: ";
+	getline(in, c.denumire);
+	cout << "Introduceti nr medici: ";
+	in >> c.numarMedici;
+	in.ignore();
+	delete[] c.medici; // Clean up existing memory if any
+	c.medici = new string[c.numarMedici];
+
+	for (int i = 0; i < c.numarMedici; i++) {
+		cout << "Medic " << (i + 1) << ": ";
+		getline(in, c.medici[i]);
+	}
+	return in;
+}
+int main()
+{
+	Cabinet c1("strada banichii");
+	Cabinet c2;
+	Cabinet c3;
+	cin >> c1;
+	//cout << c1;
+	Plomba p("sus", "plumb", 3, 3);
+	cout << p.CalculPret();
+	c1++;
+	cout << endl;
+	cout << c3.getNrMedici();
+	cout << c1.getNrMedici();
+	cout << c1[2];
+	c1 += 69;
+	cout << c1.getNrMedici();
+	
+	cout << c1("med");
+	return 0;
+}
